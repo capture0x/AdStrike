@@ -15,7 +15,6 @@ def run():
     print("""
   [1]  DCSync - Dump All Hashes
   [2]  DCSync - Target Specific User
-  [3]  DCShadow - Concept & Steps
   [4]  Check DCSync Rights (current user)
   [0]  Back
 """)

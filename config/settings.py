@@ -330,7 +330,7 @@ def krb5_request_tgt(
             # impacket saves as user.ccache in current dir
             default_ccache = f"{user}.ccache"
             if Path(default_ccache).exists():
-                Path(default_ccache).rename(cache)
+                import shutil as _shutil; _shutil.move(default_ccache, cache)
             SESSION["krb5_ccache"] = cache
             SESSION["use_kerberos"] = True
             os.environ["KRB5CCNAME"] = cache

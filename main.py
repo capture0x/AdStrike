@@ -89,7 +89,7 @@ def _tagline() -> str:
         f"  {fg(252)}|  build {BUILD}{RST}"
     )
     row2 = (
-        f"  {dim}56 menu entries  |  8 guided phases  |  AI operator  |  reports  |  creator: tmrswrr{RST}"
+        f"  {dim}25 menu entries  |  5 active phases  |  OSCP edition  |  reports  |  creator: tmrswrr{RST}"
     )
     row3 = (
         f"  {LIGHT_PINK}{BOLD}[!]{RST}  "
@@ -150,12 +150,12 @@ PHASES = [
     ]),
     ("1", "INITIAL ACCESS",       _C1, [
         ("3",  "Initial Access (No Creds)", "modules.initial_access",     "NTLM capture · relay · ARP · DHCPv6 · RID"),
-        ("4",  "CVE / AD Exploits",         "modules.cve_exploits",       "NoPac · PrintNightmare · Zerologon"),
-        ("5",  "AMSI / Defense Evasion",    "modules.amsi_bypass",        "AMSI bypass · CLM · AppLocker · Codecepticon"),
-        ("6",  "EDR / AV Evasion",          "modules.edr_evasion",        "NanoDump+MockingJay · RWXfinder · BOF · syscalls"),
-        ("7",  "UAC Bypass",                "modules.uac_bypass",         "fodhelper · eventvwr · CMSTP · token"),
-        ("8",  "Pre2K & Timeroasting",      "modules.pre2k_timeroast",    "Pre-Win2K accounts · MS-SNTP hash · MAQ abuse"),
-        ("9",  "WSUS Attack",               "modules.wsus_attack",        "WSUS HTTP spoof · pywsus · SYSTEM code exec"),
+        # [OSCP-HIDDEN] ("4",  "CVE / AD Exploits",         "modules.cve_exploits",       "NoPac · PrintNightmare · Zerologon"),
+        # [OSCP-HIDDEN] ("5",  "AMSI / Defense Evasion",    "modules.amsi_bypass",        "AMSI bypass · CLM · AppLocker · Codecepticon"),
+        # [OSCP-HIDDEN] ("6",  "EDR / AV Evasion",          "modules.edr_evasion",        "NanoDump+MockingJay · RWXfinder · BOF · syscalls"),
+        # [OSCP-HIDDEN] ("7",  "UAC Bypass",                "modules.uac_bypass",         "fodhelper · eventvwr · CMSTP · token"),
+        # [OSCP-HIDDEN] ("8",  "Pre2K & Timeroasting",      "modules.pre2k_timeroast",    "Pre-Win2K accounts · MS-SNTP hash · MAQ abuse"),
+        # [OSCP-HIDDEN] ("9",  "WSUS Attack",               "modules.wsus_attack",        "WSUS HTTP spoof · pywsus · SYSTEM code exec"),
     ]),
     ("2", "ENUMERATION",          _C2, [
         ("10", "AD Enumeration",            "modules.enum_ad",            "LDAP · SMB · GPO · DNS · Trust · SPN · LAPS"),
@@ -170,55 +170,55 @@ PHASES = [
         ("17", "Local Privilege Escalation","modules.local_privesc",      "PowerUp · KrbRelayUp · Potatoes · JEA"),
         ("18", "Kerberos Attacks",          "modules.kerberos_attacks",   "Golden · Silver · Diamond · Sapphire · Roast"),
         ("19", "Rubeus Toolkit",            "modules.rubeus_module",      "TGT · TGS · Roast · PTT · S4U · monitor"),
-        ("20", "Shadow Credentials",        "modules.shadow_credentials", "msDS-KeyCredentialLink · PKINIT"),
-        ("21", "RBCD Full Chain",           "modules.rbcd_attacks",       "Powermad · S4U2Proxy · /altservice · Bronze Bit"),
+        # [OSCP-HIDDEN] ("20", "Shadow Credentials",        "modules.shadow_credentials", "msDS-KeyCredentialLink · PKINIT"),
+        # [OSCP-HIDDEN] ("21", "RBCD Full Chain",           "modules.rbcd_attacks",       "Powermad · S4U2Proxy · /altservice · Bronze Bit"),
         ("22", "ACL / ACE Abuse",           "modules.acl_abuse",          "GenericAll · WriteDACL · ForceChange"),
-        ("23", "Certificate Abuse (ADCS)",  "modules.cert_abuse",         "ESC1–ESC13 · certipy · CertSync"),
-        ("24", "RODC Attacks",              "modules.rodc_attacks",       "PRP abuse · Key List · RODC Golden Ticket"),
-        ("25", "Golden Certificate",        "modules.golden_certificate", "ESC13/14/15/16 · CA key theft · UnPAC · PassTheCert"),
-        ("26", "UnPAC / PassTheCert",       "modules.unpac_passthecert",  "Targeted Kerberoast · UnPAC · PassTheCert · SPN-Jack"),
-        ("27", "JEA Attacks",               "modules.jea_attacks",        "JEA bypass · PSReadLine history · CLM escape"),
+        # [OSCP-HIDDEN] ("23", "Certificate Abuse (ADCS)",  "modules.cert_abuse",         "ESC1–ESC13 · certipy · CertSync"),
+        # [OSCP-HIDDEN] ("24", "RODC Attacks",              "modules.rodc_attacks",       "PRP abuse · Key List · RODC Golden Ticket"),
+        # [OSCP-HIDDEN] ("25", "Golden Certificate",        "modules.golden_certificate", "ESC13/14/15/16 · CA key theft · UnPAC · PassTheCert"),
+        # [OSCP-HIDDEN] ("26", "UnPAC / PassTheCert",       "modules.unpac_passthecert",  "Targeted Kerberoast · UnPAC · PassTheCert · SPN-Jack"),
+        # [OSCP-HIDDEN] ("27", "JEA Attacks",               "modules.jea_attacks",        "JEA bypass · PSReadLine history · CLM escape"),
     ]),
     ("4", "LATERAL MOVEMENT",     _C2, [
         ("28", "Lateral Movement",          "modules.lateral_movement",   "PSExec · WMI · DCOM · Evil-WinRM · WinRS"),
         ("29", "Coercion Attacks",          "modules.coercion_attacks",   "PrinterBug · PetitPotam · Relay→ShadowCreds"),
         ("30", "MSSQL Abuse",               "modules.mssql_abuse",        "xp_cmdshell · PowerUpSQL · linked server RCE"),
         ("31", "Password Attacks",          "modules.password_attacks",   "Spray · kerbrute · stuffing · relay"),
-        ("32", "SCCM / MECM Abuse",         "modules.sccm_abuse",         "NAA · relay · push · AdminService"),
+        # [OSCP-HIDDEN] ("32", "SCCM / MECM Abuse",         "modules.sccm_abuse",         "NAA · relay · push · AdminService"),
     ]),
     ("5", "CREDENTIAL ACCESS",    _C1, [
         ("33", "Credential Dumping",        "modules.credential_dump",    "LSASS · SAM · NTDS · lsassy · nanodump"),
-        ("34", "DPAPI & Credential Vault",  "modules.dpapi_creds",        "dploot bulk · SharpDPAPI · LaZagne · KeeThief"),
+        # [OSCP-HIDDEN] ("34", "DPAPI & Credential Vault",  "modules.dpapi_creds",        "dploot bulk · SharpDPAPI · LaZagne · KeeThief"),
         ("35", "DCSync / DCShadow",         "modules.dcsync_dcshadow",    "Full domain hash dump · rogue DC"),
         ("36", "Shadow Copies Abuse",       "modules.shadow_copies",      "VSS · NTDS.dit · SAM · SYSTEM extract"),
     ]),
     ("6", "PERSISTENCE",          _C2, [
-        ("37", "Domain Persistence",        "modules.persistence",        "Golden · AdminSDHolder · NPPSPY · TTL group"),
-        ("38", "Local Persistence",         "modules.local_persistence",  "SharPersist · WMI · Registry · Startup"),
-        ("39", "GPO Abuse",                 "modules.gpo_abuse",          "GPO create · link · exec · hijack · logon"),
-        ("40", "DNSAdmins Abuse",           "modules.dnsadmins_abuse",    "DLL injection via DNS service"),
-        ("41", "Trust Attacks",             "modules.trust_attacks",      "TrustKey · SIDHistoryDC · PAM · Multi-Hop"),
-        ("42", "AD Misc Abuse",             "modules.ad_abuse_extra",     "BackupOps · Skeleton Key · Exchange"),
+        # [OSCP-HIDDEN] ("37", "Domain Persistence",        "modules.persistence",        "Golden · AdminSDHolder · NPPSPY · TTL group"),
+        # [OSCP-HIDDEN] ("38", "Local Persistence",         "modules.local_persistence",  "SharPersist · WMI · Registry · Startup"),
+        # [OSCP-HIDDEN] ("39", "GPO Abuse",                 "modules.gpo_abuse",          "GPO create · link · exec · hijack · logon"),
+        # [OSCP-HIDDEN] ("40", "DNSAdmins Abuse",           "modules.dnsadmins_abuse",    "DLL injection via DNS service"),
+        # [OSCP-HIDDEN] ("41", "Trust Attacks",             "modules.trust_attacks",      "TrustKey · SIDHistoryDC · PAM · Multi-Hop"),
+        # [OSCP-HIDDEN] ("42", "AD Misc Abuse",             "modules.ad_abuse_extra",     "BackupOps · Skeleton Key · Exchange"),
     ]),
     ("7", "CLOUD / HYBRID",       _C1, [
-        ("43", "Azure AD / Entra ID",       "modules.azure_ad",           "AADConnect · PTA · PHS · PRT · token"),
-        ("44", "Entra Hybrid Attacks",      "modules.entra_hybrid_attacks","MSOL DCSync · adconnect.ps1 · DeviceCode · PTA"),
-        ("45", "gMSA Attacks",              "modules.gmsa_attacks",       "Enum · extract · PTH · shadow-creds · DSInternals"),
-        ("46", "ADFS & Golden SAML",        "modules.adfs_attacks",       "Token signing cert · Golden SAML · AADInternals"),
-        ("47", "AiTM / MFA Bypass",         "modules.aitm_mfa_bypass",    "Evilginx2 · MFA fatigue · cookie replay · hybrid pivot"),
-        ("48", "M365 / Teams Attacks",      "modules.m365_teams_attacks", "MailSniper · Graph API · Teams phishing · Intune abuse"),
+        # [OSCP-HIDDEN] ("43", "Azure AD / Entra ID",       "modules.azure_ad",           "AADConnect · PTA · PHS · PRT · token"),
+        # [OSCP-HIDDEN] ("44", "Entra Hybrid Attacks",      "modules.entra_hybrid_attacks","MSOL DCSync · adconnect.ps1 · DeviceCode · PTA"),
+        # [OSCP-HIDDEN] ("45", "gMSA Attacks",              "modules.gmsa_attacks",       "Enum · extract · PTH · shadow-creds · DSInternals"),
+        # [OSCP-HIDDEN] ("46", "ADFS & Golden SAML",        "modules.adfs_attacks",       "Token signing cert · Golden SAML · AADInternals"),
+        # [OSCP-HIDDEN] ("47", "AiTM / MFA Bypass",         "modules.aitm_mfa_bypass",    "Evilginx2 · MFA fatigue · cookie replay · hybrid pivot"),
+        # [OSCP-HIDDEN] ("48", "M365 / Teams Attacks",      "modules.m365_teams_attacks", "MailSniper · Graph API · Teams phishing · Intune abuse"),
     ]),
     ("8", "ADVANCED OPERATIONS",  _C2, [
-        ("47", "Exploit Chains",            "modules.exploit_chains",     "8 pre-built full-DA attack paths"),
-        ("48", "C2 Integration",            "modules.c2_integration",     "Sliver · Havoc · MSF · CS payload delivery"),
-        ("49", "Loot Parser & Analyzer",    "modules.loot_parser",        "Parse · dedup · score · export creds"),
-        ("50", "AD Advanced Playbook",      "modules.ad_advanced_playbook","WDAC · MDE/MDI · WMI filters · trusts · deception"),
+        # [OSCP-HIDDEN] ("47", "Exploit Chains",            "modules.exploit_chains",     "8 pre-built full-DA attack paths"),
+        # [OSCP-HIDDEN] ("48", "C2 Integration",            "modules.c2_integration",     "Sliver · Havoc · MSF · CS payload delivery"),
+        # [OSCP-HIDDEN] ("49", "Loot Parser & Analyzer",    "modules.loot_parser",        "Parse · dedup · score · export creds"),
+        # [OSCP-HIDDEN] ("50", "AD Advanced Playbook",      "modules.ad_advanced_playbook","WDAC · MDE/MDI · WMI filters · trusts · deception"),
     ]),
 ]
 
 UTILITIES = [
-    ("51", "AdStrike Agent (AI)",  "modules.red_team_agent",   "Claude AI · autonomous attack orchestrator · all modules"),
-    ("52", "Smart Analyst",        "modules.analyst",          "Parse outputs · build attack plan · auto-execute"),
+    # [OSCP-HIDDEN] ("51", "AdStrike Agent (AI)",  "modules.red_team_agent",   "Claude AI · autonomous attack orchestrator · all modules"),
+    # [OSCP-HIDDEN] ("52", "Smart Analyst",        "modules.analyst",          "Parse outputs · build attack plan · auto-execute"),
     ("53", "Kerberos Manager",     "modules.kerberos_manager", "TGT · PTT · S4U · ccache · krb5.conf"),
     ("54", "Generate Report",      "modules.reporting",        "HTML · Markdown · JSON pentest report"),
     ("55", "Session Manager",      None,                       "Save · load · switch · clear sessions"),
@@ -366,7 +366,6 @@ def print_menu():
         f"{PURE_WHITE}[{KEY_SESSION_MANAGER}] Session{RST} {SOFT_WHITE}-> "
         f"{PURE_WHITE}[{KEY_TOOL_CHECKER}] Tool Checker{RST} {SOFT_WHITE}-> "
         f"{PURE_WHITE}[{KEY_ENUM}] Enum{RST} {SOFT_WHITE}-> "
-        f"{PURE_WHITE}[{KEY_AI_AGENT}] AI Agent{RST} {SOFT_WHITE}-> "
         f"{PURE_WHITE}[{KEY_REPORT}] Report{RST}"
     )
     print()
@@ -833,6 +832,7 @@ def session_manager():
   {BABY_BLUE}[2]{RST} Save session to file
   {BABY_BLUE}[3]{RST} Load session from file
   {BABY_BLUE}[4]{RST} Clear credentials
+  {BABY_BLUE}[5]{RST} Edit credentials
   {LIGHT_PINK}[0]{RST} Back
 """)
     c = input(f"  {M}Choice{RST}: ").strip()
@@ -857,6 +857,24 @@ def session_manager():
                   "nt_hash", "attacker_ip", "attacker_iface"]:
             SESSION[k] = ""
         success("Session cleared")
+    elif c == "5":
+        fields = [
+            ("dc_ip",         "DC IP / Target", SESSION.get("dc_ip", "")),
+            ("domain",        "Domain",        SESSION.get("domain", "")),
+            ("username",      "Username",      SESSION.get("username", "")),
+            ("password",      "Password",      ""),
+            ("nt_hash",       "NT Hash",       ""),
+            ("attacker_ip",   "Attacker IP",   SESSION.get("attacker_ip", "")),
+        ]
+        print()
+        for key, label, current in fields:
+            display = f" [{current}]" if current and key not in ("password","nt_hash") else ""
+            val = prompt(f"{label}{display} (Enter to keep)")
+            if val:
+                SESSION[key] = val
+        from config.settings import _refresh_derived; _refresh_derived()
+        save_session()
+        success("Credentials updated")
     input(f"\n  {M}[Enter]{RST} to return...")
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -85,25 +85,15 @@ def mask_secret(value: str, keep: int = 4) -> str:
     return f"{s[:keep]}...{s[-keep:]}"
 
 def pause(msg="[Enter] to return"):
-    # When invoked via run.sh the process is wrapped in `... | tee log`,
-    # so stdin is the pipe, not the user's terminal. input() then reads
-    # the (already-drained) pipe and returns immediately instead of
-    # blocking — the user sees the prompt vanish in a flash. Detect that
-    # and switch to /dev/tty before prompting.
-    import sys
+    import sys, os
     try:
-        if not sys.stdin.isatty():
-            try:
-                sys.stdin = open("/dev/tty", "r")
-            except Exception:
-                pass
-        input(f"  {M}{msg}{RST}")
-    except EOFError:
-        try:
-            sys.stdin = open("/dev/tty", "r")
-            input(f"  {M}{msg}{RST}")
-        except Exception:
-            pass
+        _tty = os.open("/dev/tty", os.O_RDONLY)
+        sys.stdout.write(f"  {M}{msg}{RST}\n")
+        sys.stdout.flush()
+        os.read(_tty, 1024)
+        os.close(_tty)
+    except Exception:
+        pass
 
 def section(title):
     """Thin section divider used inside modules."""

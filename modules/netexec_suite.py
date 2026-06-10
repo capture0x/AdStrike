@@ -25,7 +25,6 @@ def run():
   [2]  SMB Code Execution (cmd/ps)
   [3]  SMB Credential Dump (lsassy/nanodump/mimikatz)
   [4]  SMB File Operations (spider/get/put)
-  [5]  SMB Vuln Scan (ms17-010/petitpotam/nopac)
   {C}── LDAP ─────────────────────────────────────────────────────────{RST}
   [6]  LDAP Enumeration (users/groups/DC/ADCS/Maq)
   [7]  LDAP Kerberoast / AS-REP Roast
@@ -35,12 +34,7 @@ def run():
   [10] RDP Check
   [11] SSH Check
   {C}── NXC MODULES ──────────────────────────────────────────────────{RST}
-  [12] enum_av             (detect AV/EDR product)
-  [13] teams_localdb       (Teams credential extraction)
-  [14] dpapi               (DPAPI credential extraction)
   [15] get_netconnections  (active network connections)
-  [16] wireless            (WiFi credentials)
-  [17] slinky              (drop + auto-exec LNK file)
   [0]  Back
 """)
     c = input(f"  {M}Choice:{RST} ").strip()

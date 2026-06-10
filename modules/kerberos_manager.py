@@ -41,8 +41,6 @@ def run():
   [8]  Destroy / clear tickets
   [9]  Switch ccache file
   {C}── ADVANCED ──────────────────────────────────────────────────{RST}
-  [10] S4U2Self  (impersonate user via service account)
-  [11] S4U2Proxy (delegate to target SPN)
   [12] Overpass-the-Hash (NTLM → Kerberos TGT)
   [13] Generate krb5.conf for this domain
   [14] Toggle Kerberos mode ON/OFF
@@ -60,6 +58,8 @@ def run():
             domain=dom, dc_ip=dc, ccache=cache
         )
         if ok:
+            from config.settings import save_session
+            save_session()
             success(f"TGT active — Kerberos mode enabled")
             success(f"ccache: {cache}")
             print(f"\n  {Y}Export for manual use:{RST}")

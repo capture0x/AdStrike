@@ -702,3 +702,97 @@ The author accepts no liability for damage, data loss, service disruption, or le
 **contact** - Mail : tmrswrr -at- gmail.com
 
 Maintained for authorized offensive security research, lab validation, and professional red team operations.
+---
+
+## Fork Changes — `h4ck4u/AdStrike` (`oscp-fixes` branch)
+
+This fork contains bug fixes and new features discovered during real-world testing against an Active Directory lab environment. All changes are backwards-compatible and tested on Kali Linux with Python 3.13, Impacket 0.13.1, and NetExec latest.
+
+### New Dependencies
+
+Install after cloning:
+
+```bash
+# BloodHound Community Edition compatible collector (replaces legacy bloodhound-python)
+pip install bloodhound-ce --break-system-packages
+
+# Kerberos CLI tools (for klist, kinit, kdestroy)
+sudo apt install -y krb5-user
+```
+
+Add to `.env` for BloodHound CE auto-upload:
+```
+BHCE_PASS=<your_bloodhound_ce_admin_password>
+BHCE_URL=http://localhost:8080
+```
+
+---
+
+### Bug Fixes
+
+#### `pause()` — tty corruption after socket/network calls (`utils/helpers.py`)
+**Root cause:** `run.sh` uses `tee >(sed...)` process substitution. After any socket or `urllib` call, Python's `input()` reads EOF from the pipe instantly instead of blocking on the terminal — causing the menu to reload immediately with no visible output.
+
+**Fix:** Replaced `input()` with `os.open("/dev/tty", O_RDONLY)` + `os.read()` — completely immune to the tee pipe issue.
+
+#### BloodHound collection hanging (`modules/bloodhound_helper.py`)
+**Root cause:** Legacy `bloodhound-python` was used — it misses ACL edges in BloodHound CE. Additionally, `capture=True` in `run_cmd()` caused silent hangs on slow collections because output was fully buffered.
+
+**Fix:** Switched to `bloodhound-ce-python`, fixed DNS flags (`-gc DC01.{domain}`), and used `subprocess.run(stdin=DEVNULL)` for collection to prevent tty consumption.
+
+#### AS-REP Roast failing without userlist (`modules/enum_ad.py`)
+**Root cause:** `GetNPUsers.py` was called with `/tmp/users.txt` which didn't exist in a fresh session.
+
+**Fix:** Auto-generate the userlist via `nxc smb --users` before calling GetNPUsers.
+
+#### ForceChangePassword requiring current password (`modules/acl_abuse.py`)
+**Root cause:** `changepasswd.py` requires the victim's current password, making it useless for ACL abuse scenarios (GenericAll / ForceChangePassword rights).
+
+**Fix:** Replaced with `bloodyAD set password` which works with ACL rights without needing the victim's current password.
+
+#### SAM dump failing on remote targets (`modules/credential_dump.py`)
+**Root cause:** `-sam -system` flags are for offline registry hive parsing, not remote targets. Passing them to a remote secretsdump call causes argument errors.
+
+**Fix:** Removed those flags — `secretsdump.py` auto-detects remote vs local mode.
+
+#### Kerberos PTT psexec failing with `KDC_ERR_S_PRINCIPAL_UNKNOWN` (`modules/kerberos_attacks.py`)
+**Root cause:** `psexec.py -k` was targeting the DC by IP address. Kerberos requires a hostname (FQDN) for SPN resolution.
+
+**Fix:** Changed `{dc}` to `DC01.{dom}` for Kerberos hostname resolution.
+
+#### `_ENV` NameError in module scope
+**Root cause:** `_ENV` from `config.settings` was used in nested code blocks added to modules, but was never imported — causing a silent `NameError` caught by `dispatch()`, resulting in instant menu reload with no output or error message.
+
+**Fix:** Added `_ENV` to the `from config.settings import SESSION as _S, OUTPUT_DIR, _ENV` statement in affected modules.
+
+---
+
+### New Features
+
+#### `[11] Upload latest ZIP to BloodHound CE` (`modules/bloodhound_helper.py`)
+Upload the latest BloodHound collection ZIP directly to BloodHound Community Edition from within AdStrike. Uses pure Python `urllib` — no subprocess, no stdin interference.
+
+Reads `BHCE_PASS` and `BHCE_URL` from `.env`.
+
+#### `[12] Max Query — BloodHound CE attack paths` (`modules/bloodhound_helper.py`)
+Run preset Cypher queries against BloodHound CE via the [Max CLI](https://github.com/knavesec/Max) directly from AdStrike.
+
+Preset queries:
+- Shortest path from owned nodes → Domain Admins
+- All outbound edges from current user
+- Mark a node as owned
+- Custom Cypher query
+
+Requires Max installed at `/opt/Max/max.py`.
+
+#### `[5] Edit Credentials` — Session Manager (`main.py`)
+Update individual session fields (DC IP/target, username, password, NT hash, attacker IP) without clearing the entire session. Essential for lateral movement when switching between targets mid-engagement.
+
+---
+
+### Debugging Notes
+
+If a module selection causes instant menu reload with no output:
+1. Check `dispatch()` in `main.py` — it catches ALL exceptions silently
+2. Run `python3 -m py_compile modules/your_module.py` to check for syntax errors
+3. Common cause: using `_ENV`, `BASE_DIR`, or `bh_out_dir` outside their defined scope

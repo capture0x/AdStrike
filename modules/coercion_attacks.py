@@ -28,9 +28,7 @@ def run():
   {C}── RELAY & CAPTURE ──────────────────────────────────────────────{RST}
   [7]  Capture NTLMv2 Hash         (Responder + trigger coercion)
   [8]  Relay → LDAP / LDAPS        (add computer / DCSync rights)
-  [9]  Relay → ADCS                (DC certificate → Domain Admin)
   [10] Unconstrained Delegation TGT Capture  (Rubeus monitor + coerce)
-  [11] Relay → Shadow Credentials  (ntlmrelayx --shadow-credentials)
   [0]  Back
 """)
     c = input(f"  {M}Choice:{RST} ").strip()

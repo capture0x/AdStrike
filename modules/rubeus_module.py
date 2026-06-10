@@ -16,12 +16,8 @@ def run():
   [2]  Kerberoasting
   [3]  AS-REP Roasting
   [4]  Dump / Triage tickets
-  [5]  Monitor TGTs (Unconstrained Delegation)
-  [6]  S4U — Constrained Delegation
-  [7]  S4U — RBCD exploit
   [8]  Pass-the-Ticket (.kirbi inject)
   [9]  Silver Ticket (altservice)
-  [10] Renew / Purge
   [0]  Back
 """)
     c = input(f"  {M}Choice:{RST} ").strip()

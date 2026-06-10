@@ -42,7 +42,7 @@ def run():
     pw   = input_or_session("password", "Password")
 
     print("""
-  [1]  Collect All Data          (bloodhound-python)
+  [1]  Collect All Data          (bloodhound-ce-python)
   [2]  Collect DCOnly            (faster, DC targets only)
   [3]  Print Neo4j Query Library
   [4]  Mark Node as Owned
@@ -52,12 +52,14 @@ def run():
   [8]  ADExplorer Snapshot       (zero-LDAP offline BloodHound analysis)
   [9]  Kerberos Time Sync Help   (fix KRB_AP_ERR_SKEW)
   [10] Collect DCOnly with faketime
+  [11] Upload latest ZIP to BloodHound CE
+  [12] Max Query (BloodHound CE attack paths)
   [0]  Back
 """)
     c = input(f"  {M}Choice:{RST} ").strip()
 
     import os, glob, shutil
-    from config.settings import SESSION as _S, OUTPUT_DIR
+    from config.settings import SESSION as _S, OUTPUT_DIR, _ENV
     bh_out_dir = os.path.join(_S.get("output_dir") or str(OUTPUT_DIR), "bloodhound")
     os.makedirs(bh_out_dir, exist_ok=True)
 
@@ -96,13 +98,13 @@ def run():
 
         if use_kerberos and ccache:
             auth = f"-u {shell_quote(user)} -k -no-pass"
-            auth = f"KRB5CCNAME={shell_quote(ccache)} {prefix}bloodhound-python {auth}"
+            auth = f"KRB5CCNAME={shell_quote(ccache)} {prefix}bloodhound-ce-python {auth}"
         elif nt_hash:
-            auth = f"{prefix}bloodhound-python -u {shell_quote(user)} --hashes {shell_quote(':' + nt_hash.split(':')[-1])}"
+            auth = f"{prefix}bloodhound-ce-python -u {shell_quote(user)} --hashes {shell_quote(':' + nt_hash.split(':')[-1])}"
         else:
-            auth = f"{prefix}bloodhound-python -u {shell_quote(user)} -p {shell_quote(password)}"
+            auth = f"{prefix}bloodhound-ce-python -u {shell_quote(user)} -p {shell_quote(password)}"
 
-        cmd = f"{auth} -d {shell_quote(dom)} -ns {shell_quote(dc)} --dns-tcp --disable-autogc"
+        cmd = f"{auth} -d {shell_quote(dom)} -ns {shell_quote(dc)} -gc DC01.{shell_quote(dom)}"
         if dc_fqdn:
             cmd += f" -dc {shell_quote(dc_fqdn)}"
         return cmd
@@ -134,9 +136,9 @@ def run():
     4. Try DCOnly first: BloodHound Helper -> [2]
 """)
 
-    def _collect(collection, prefix=""):
-        if not shutil.which("bloodhound-python"):
-            error("bloodhound-python not found. Install with: pip install bloodhound")
+    def _collect(collection, prefix="", stop_fn=None):
+        if not shutil.which("bloodhound-ce-python"):
+            error("bloodhound-ce-python not found. Install with: pip install bloodhound")
             return
         if not _has_collection_auth():
             return
@@ -144,12 +146,15 @@ def run():
         os.chdir(bh_out_dir)
         try:
             cmd = f"{_bloodhound_base(prefix)} -c {shell_quote(collection)} --zip"
-            output = run_cmd(cmd, capture=True, timeout=600)
-            if output.strip():
-                print(output)
-                _show_collection_help(output)
+            import subprocess as _sp
+            _sp.run(cmd, shell=True, stdin=_sp.DEVNULL, timeout=600)
         finally:
             os.chdir(prev_dir)
+        if stop_fn:
+            stop_fn()
+            import time; time.sleep(0.2)
+            sys.stdout.write("\n")
+            sys.stdout.flush()
         zips = sorted(glob.glob(os.path.join(bh_out_dir, "*.zip")))
         if zips:
             success(f"BloodHound zip → {fg(75)}{zips[-1]}{RST}")
@@ -160,8 +165,7 @@ def run():
 
     if c == "1":
         stop = spinner("Collecting BloodHound data (All)")
-        _collect("All")
-        stop()
+        _collect("All", stop_fn=stop)
 
     elif c == "2":
         _collect("DCOnly")
@@ -219,7 +223,7 @@ def run():
   python3 ADExplorerSnapshot.py ADSnapshot.dat -o {out}{RST}
 
   {NEON_CYN}Comparison:{RST}
-  {DIM}bloodhound-python : LDAP-based, well-detected, needs network access
+  {DIM}bloodhound-ce-python : LDAP-based, well-detected, needs network access
   SOAPHound          : ADWS/SOAP, stealthier, requires ADWS TCP 9389
   RustHound          : LDAP-based but fast, cross-platform
   ADExplorer         : zero LDAP volume during snapshot; analysis offline{RST}
@@ -298,8 +302,8 @@ def run():
   {Y}Export specific objects to CSV:{RST}
   # In ADExplorer GUI: search → right-click → Export to CSV
 
-  {NEON_CYN}Why ADExplorer is stealthier than bloodhound-python:{RST}
-  {DIM}bloodhound-python   : many LDAP queries → easily detected by MDI/SIEM
+  {NEON_CYN}Why ADExplorer is stealthier than bloodhound-ce-python:{RST}
+  {DIM}bloodhound-ce-python   : many LDAP queries → easily detected by MDI/SIEM
   ADExplorer snapshot : ONE bulk LDAP sync → looks like normal AD replication
   ADExplorerSnapshot  : conversion runs OFFLINE on attacker → zero on-target traffic
   Result              : identical BloodHound data with much lower detection risk{RST}
@@ -323,7 +327,7 @@ def run():
     sudo ntpdate -u {dc}
 
   Then retry:
-    bloodhound-python -u {shell_quote(user)} -p '<password>' -d {dom} \\
+    bloodhound-ce-python -u {shell_quote(user)} -p '<password>' -d {dom} \\
       -ns {dc} --dns-tcp -dc {SESSION.get("dc_fqdn") or "DC1." + dom} -c DCOnly --zip
 
   If NTP is blocked on the target, run:
@@ -340,4 +344,88 @@ def run():
             else:
                 _collect("DCOnly", prefix=f"faketime {shell_quote(dc_time)} ")
 
+    elif c == "11":
+        import urllib.request as _ur, json as _json, glob as _glob2
+        _bhce_pass = _ENV.get("BHCE_PASS", "")
+        _bhce_url  = _ENV.get("BHCE_URL", "http://localhost:8080")
+        _zips      = sorted(_glob2.glob(os.path.join(bh_out_dir, "*.zip")))
+        if not _zips:
+            warn("No ZIP found — run collection first")
+        elif not _bhce_pass:
+            warn("Set BHCE_PASS in .env first")
+        else:
+            info(f"Uploading {os.path.basename(_zips[-1])}...")
+            try:
+                def _post(url, data, headers):
+                    req = _ur.Request(url, data=data, headers=headers, method="POST")
+                    with _ur.urlopen(req, timeout=15) as r:
+                        body = r.read()
+                        return _json.loads(body) if body.strip() else {}
+                _token = _post(_bhce_url+"/api/v2/login",
+                    _json.dumps({"login_method":"secret","username":"admin","secret":_bhce_pass}).encode(),
+                    {"Content-Type":"application/json"})["data"]["session_token"]
+                _uid = _post(_bhce_url+"/api/v2/file-upload/start", b"{}",
+                    {"Content-Type":"application/json","Authorization":f"Bearer {_token}"})["data"]["id"]
+                with open(_zips[-1],"rb") as _f:
+                    _post(f"{_bhce_url}/api/v2/file-upload/{_uid}", _f.read(),
+                        {"Content-Type":"application/zip","Authorization":f"Bearer {_token}"})
+                _post(f"{_bhce_url}/api/v2/file-upload/{_uid}/end", b"{}",
+                    {"Content-Type":"application/json","Authorization":f"Bearer {_token}"})
+                success(f"Upload complete → {os.path.basename(_zips[-1])}")
+            except Exception as _e:
+                warn(f"Upload failed: {_e}")
+                warn("Check BHCE_PASS in .env and that BloodHound CE is running on port 8080")
+    elif c == "12":
+        max_py = "/opt/Max/max.py"
+        if not os.path.exists(max_py):
+            warn("Max not found at /opt/Max/max.py")
+        else:
+            print(f"""
+  {Y}Preset queries:{RST}
+  [1] Shortest path owned → DA
+  [2] All edges from current user
+  [3] Mark node as owned
+  [4] Custom Cypher query
+  [5] Machine Account Quota (LDAP relay viability)
+  [6] All owned nodes
+  [7] Kerberoastable users
+  [8] AS-REP roastable users
+""")
+            mc = input(f"  {M}Choice:{RST} ").strip()
+            neo4j_url = _ENV.get("NEO4J_URL", "http://127.0.0.1:7474")
+            neo4j_user = _ENV.get("NEO4J_USER", "neo4j")
+            neo4j_pass = _ENV.get("NEO4J_PASS", "bloodhoundcommunityedition")
+            max_base = f"python3 {max_py} -u {neo4j_user} -p {neo4j_pass} --url {neo4j_url}"
+            dom_upper = dom.upper()
+            if mc == "1":
+                _q1 = f"MATCH p=shortestPath((u:User {{owned:true}})-[*1..]->(g:Group {{name:'DOMAIN ADMINS@{dom_upper}'}})) RETURN p"
+                run_cmd(f"{max_base} query -q {shell_quote(_q1)} --path")
+            elif mc == "2":
+                _q2 = f"MATCH (u:User {{name:'{user.upper()}@{dom_upper}'}})-[r]->(n) RETURN type(r), n.name"
+                run_cmd(f"{max_base} query -q {shell_quote(_q2)}")
+            elif mc == "3":
+                node = prompt("Node to mark owned (e.g. USER@DOMAIN.LOCAL)")
+                if node:
+                    import tempfile
+                    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+                        f.write(node.upper() + "\n")
+                        tmp = f.name
+                    run_cmd(f"{max_base} mark-owned -f {tmp}")
+            elif mc == "4":
+                query = prompt("Cypher query")
+                if query:
+                    run_cmd(f'{max_base} query -q "{query}"')
+            elif mc == "5":
+                _q5 = "MATCH (d:Domain) RETURN d.name, d.machineaccountquota"
+                run_cmd(f"{max_base} query -q {shell_quote(_q5)}")
+            elif mc == "6":
+                _q6 = "MATCH (u:User {owned:true}) RETURN u.name"
+                run_cmd(f"{max_base} query -q {shell_quote(_q6)}")
+            elif mc == "7":
+                _q7 = "MATCH (u:User {hasspn:true}) RETURN u.name, u.serviceprincipalnames"
+                run_cmd(f"{max_base} query -q {shell_quote(_q7)}")
+            elif mc == "8":
+                _q8 = "MATCH (u:User {dontreqpreauth:true}) RETURN u.name"
+                run_cmd(f"{max_base} query -q {shell_quote(_q8)}")
+    sys.stdout.write("\n"); sys.stdout.flush()
     pause()

@@ -20,22 +20,9 @@ MENU = """
   [4]  Overpass-the-Hash              (NTLM → TGT)
   [5]  Golden Ticket Forge            (krbtgt hash)
   [6]  Silver Ticket Forge            (service hash)
-  [10] Diamond Ticket                 (stealthy TGT modification)
-  [11] Sapphire Ticket                (copy legit PAC — max stealth)
-  ── DELEGATION ABUSE ────────────────────────────────────────
-  [7]  Unconstrained Delegation Abuse
-  [8]  Constrained Delegation         (S4U2Proxy)
-  [9]  RBCD Attack
-  [12] Bronze Bit                     (CVE-2020-17049 S4U forwardable bypass)
   ── ENUMERATION / SPRAY (NO NTLM NEEDED) ────────────────────
   [13] kerbrute — User Enumeration    (Kerberos port 88)
   [14] AS-REQ Password Spray          (kerbrute, no lockout alert)
-  ── RELAY / LPE ─────────────────────────────────────────────
-  [15] KrbRelayUp                     (Kerberos relay → local SYSTEM)
-  ── CERTIFICATE / PKINIT ────────────────────────────────────
-  [16] PKINIT — Cert-based TGT        (pfx/pem → ccache)
-  ── WORKFLOW ────────────────────────────────────────────────
-  [A]  NTLM-Disabled Attack Workflow  (auto-guided for NTLM=OFF DCs)
   [0]  Back
 """
 

