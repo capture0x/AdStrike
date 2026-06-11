@@ -89,7 +89,7 @@ def _tagline() -> str:
         f"  {fg(252)}|  build {BUILD}{RST}"
     )
     row2 = (
-        f"  {dim}56 menu entries  |  8 guided phases  |  AI operator  |  reports  |  creator: tmrswrr{RST}"
+        f"  {dim}58 menu entries  |  8 guided phases  |  AI operator  |  reports  |  creator: tmrswrr{RST}"
     )
     row3 = (
         f"  {LIGHT_PINK}{BOLD}[!]{RST}  "
@@ -430,7 +430,12 @@ def _parse_nmap(output: str) -> dict:
         # Domain: corp.local
         m = re.search(r"Domain:\s*([\w\.-]+)", line)
         if m and not result.get("domain"):
-            dom = m.group(1).rstrip("0")  # nmap sometimes appends a stray trailing 0
+            # nmap occasionally appends ONE stray trailing 0; drop just that one,
+            # not every trailing zero, so a label that legitimately ends in 0
+            # (e.g. "lab0.corp") keeps the rest of its name.
+            dom = m.group(1).rstrip(".")
+            if dom.endswith("0"):
+                dom = dom[:-1]
             result["domain"] = dom
             result["base_dn"] = "DC=" + dom.replace(".", ",DC=")
 
@@ -845,12 +850,9 @@ def session_manager():
         success("Session saved!")
     elif c == "3":
         path = prompt("Session file path")
-        if os.path.exists(path):
-            with open(path) as f:
-                SESSION.update(json.load(f))
-            success("Session loaded!")
-        else:
-            error("File not found")
+        # Route through load_session_file() so redacted '***' placeholders are
+        # scrubbed (never reused as creds) and derived fields / KRB5 env refresh.
+        load_session_file(path)
     elif c == "4":
         reset_engagement_state()
         for k in ["dc_ip", "domain", "username", "password",
