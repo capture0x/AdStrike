@@ -226,6 +226,13 @@ def run_cmd(cmd, capture=False, silent=False, log=True, timeout=120, return_code
     except Exception as e:
         error(str(e))
         return 1 if return_code else ""
+    finally:
+        # Close the /dev/tty handle so long sessions don't leak file descriptors.
+        if tty is not None:
+            try:
+                tty.close()
+            except Exception:
+                pass
 
 _SYSPY   = "/usr/bin/python3"
 _IMP_DIR = "/usr/share/doc/python3-impacket/examples"
